@@ -28,6 +28,7 @@ const LoginComponent = (props) => {
                     icon={<PersonIcon width={24} height={24} fill={"#fff"} />}
                     btnColor={"#098EB2"}
                     style={{ height: "30%" }}
+                    onPress={() => props.onButtonPress({ screen: props.screen, action: "student" })}
                 />
                 <Button
                     text={"Teacher"}
@@ -35,6 +36,7 @@ const LoginComponent = (props) => {
                     icon={<TeacherIcon width={24} height={24} fill={"#fff"} />}
                     btnColor={"#22B2DA"}
                     style={{ height: "20%" }}
+                    onPress={() => props.onButtonPress({ screen: props.screen, action: "teacher" })}
                 />
                 <Button
                     text={"Principle"}
@@ -42,6 +44,7 @@ const LoginComponent = (props) => {
                     icon={<PrincipleIcon width={24} height={24} fill={"#fff"} />}
                     btnColor={"#22B2DA"}
                     style={{ height: "20%" }}
+                    onPress={() => props.onButtonPress({ screen: props.screen, action: "principle" })}
                 />
             </View>
         </View>

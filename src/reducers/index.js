@@ -11,16 +11,16 @@ const persistConfig = {
 };
 
 const INITIAL_STATE = {
-    eren: 1,
+    students: [],
 };
 
 const mainReducer = (state = INITIAL_STATE, action) => {
     switch (action.type) {
-        case 'INC_EREN':
-            console.log("set eren ", state.eren + action.payload);
+        case 'SET_STUDENTS':
+            console.log("set students");
             return {
                 ...state,
-                eren: state.eren + action.payload
+                students: [...action.payload],
             }
 
         default:

@@ -20,6 +20,14 @@ const LoginScreen = (props) => {
     const pager = useRef(PagerView);
     const pager2 = useRef(PagerView);
 
+    // @desc         | navigates to according page with parameters screen & action
+
+    // @param screen | has value of 1 or 2, 1 meaning log in, 2 meaning sign up
+    // @param action | can have values "student", "teacher", "principle" according to action
+    const _selectiveLogin = ({ screen, action }) => {
+        props.navigation.navigate('SelectiveLogin', { screen: screen, action: action });
+    }
+
     useEffect(() => {
 
     }, [])
@@ -55,10 +63,16 @@ const LoginScreen = (props) => {
                         ref={pager}
                     >
                         <View key="1">
-                            <LoginComponent screen={1} />
+                            <LoginComponent
+                                screen={1}
+                                onButtonPress={({ screen, action }) => _selectiveLogin({ screen: screen, action: action })}
+                            />
                         </View>
                         <View key="2">
-                            <LoginComponent screen={2} />
+                            <LoginComponent
+                                screen={2}
+                                onButtonPress={({ screen, action }) => _selectiveLogin({ screen: screen, action: action })}
+                            />
                         </View>
                     </PagerView>
                 </View>
@@ -96,24 +110,16 @@ const LoginScreen = (props) => {
                             </PagerView>
                         </View>
                         <View style={styles.bannerFooter}>
-                            {
-                                bannerPos == 0 ? <View style={styles.bannerDotSelected} /> : <View style={styles.bannerDot} />
-                            }
-                            {
-                                bannerPos == 1 ? <View style={styles.bannerDotSelected} /> : <View style={styles.bannerDot} />
-                            }
-                            {
-                                bannerPos == 2 ? <View style={styles.bannerDotSelected} /> : <View style={styles.bannerDot} />
-                            }
-                            {
-                                bannerPos == 3 ? <View style={styles.bannerDotSelected} /> : <View style={styles.bannerDot} />
-                            }
+                            {bannerPos == 0 ? <View style={styles.bannerDotSelected} /> : <View style={styles.bannerDot} />}
+                            {bannerPos == 1 ? <View style={styles.bannerDotSelected} /> : <View style={styles.bannerDot} />}
+                            {bannerPos == 2 ? <View style={styles.bannerDotSelected} /> : <View style={styles.bannerDot} />}
+                            {bannerPos == 3 ? <View style={styles.bannerDotSelected} /> : <View style={styles.bannerDot} />}
                         </View>
                     </View>
                 </View>
             </View>
             <View style={{ position: "absolute", bottom: -64, width: "100%", zIndex: -1 }}>
-                <Image source={BottomImage} style={styles.bottom} />
+                <Image source={BottomImage} />
             </View>
         </View>
     );
@@ -122,7 +128,7 @@ const LoginScreen = (props) => {
 const mapStateToProps = (state) => {
     return {
         reducer: state.mainReducer,
-        API: state.API,
+        local: state.local,
     }
 };
 
