@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, TouchableOpacity, Image, TextInput, FlatList, ScrollView } from 'react-native';
+import { Text, View, TouchableOpacity, Image, TextInput, FlatList, ScrollView, KeyboardAvoidingView } from 'react-native';
 import { connect } from 'react-redux';
 import DatePicker from 'react-native-date-picker'
 
@@ -30,6 +30,15 @@ const GiveHomeworkScreen = (props) => {
     const [endDate, setEndDate] = useState(new Date(Date.now()));
     const [estTime, setEstTime] = useState("");
 
+    const getTeacherStudentCount = () => {
+        const students = [];
+        const teacher = props.reducer.teachers.filter(element => element.id == props.reducer.loginAs.id);
+        teacher[0].students_id.map(student_id => {
+            students.push(props.reducer.students.filter(element => element.id == student_id)[0]);
+        })
+        return students.length
+    }
+
     const giveHomework = () => {
         if (title == "" || title.length == 0) {
             alert("Please enter a title.");
@@ -53,7 +62,7 @@ const GiveHomeworkScreen = (props) => {
         }
 
         const homework = {
-            assigned_id: props.route.params.id,
+            assigned_id: [...(props.reducer.homework_select_all && props.reducer.students.map(el => { return el.id }))],
             teacher_id: props.reducer.loginAs.id,
             title: title,
             lecture: props.reducer.loginAs.lecture,
@@ -61,12 +70,16 @@ const GiveHomeworkScreen = (props) => {
             payload: attach,
             start_time: startDate.getTime(),
             end_time: endDate.getTime(),
-            completed: false,
             estimated_solve_time: estTime,
         }
 
         API.sendHomework({ homework: homework }).then(response => {
             console.log("homework response -> ", response);
+            alert("Successfully given the homework titled " + homework.title);
+            API.getAllHomeworks().then(response => {
+                props.dispatch({ type: "SET_ALL_HOMEWORKS", payload: response });
+                props.navigation.navigate('Panel');
+            });
         });
     }
 
@@ -77,69 +90,71 @@ const GiveHomeworkScreen = (props) => {
             <View style={{ flexDirection: "row", paddingLeft: 18, paddingRight: 18, paddingBottom: 8 }}>
                 <HatIcon width={24} height={24} fill={"#000"} />
                 <View style={{ width: "100%", height: "100%" }}>
-                    <Text style={{ fontSize: 18, color: "black", marginLeft: 8 }}>Giving a homework to</Text>
-                    <Text style={{ marginLeft: 8, fontWeight: "800", color: "black", fontSize: 24 }}>{props.route.params.name}</Text>
+                    <Text style={{ fontSize: 18, color: "black", marginLeft: 8 }}>Giving homework to</Text>
+                    <Text style={{ marginLeft: 8, fontWeight: "800", color: "black", fontSize: 24 }}>{props.reducer.homework_select_all && getTeacherStudentCount() + " students"}</Text>
                 </View>
             </View>
-            <ScrollView style={{ flex: 1, }}>
-                <Text style={{ marginBottom: 8, marginTop: 12, color: "black", fontSize: 18, fontWeight: "600", paddingLeft: 18, paddingRight: 18 }}>Title</Text>
-                <View style={{ width: "100%", height: 48, paddingLeft: 18, paddingRight: 18 }}>
-                    <TextInput
-                        style={{ width: "100%", height: "100%", borderRadius: 8, paddingLeft: 16, paddingRight: 16, backgroundColor: "white", elevation: 8, borderWidth: 2, borderColor: "#22B2DA" }}
-                        value={title}
-                        onChangeText={text => setTitle(text)}
-                        placeholder="Enter a title to this homework..."
-                        maxLength={32}
-                        key="title"
-                    />
-                </View>
-                <Text style={{ marginBottom: 8, marginTop: 12, color: "black", fontSize: 18, fontWeight: "600", paddingLeft: 18, paddingRight: 18 }}>Description</Text>
-                <View style={{ width: "100%", height: 84, paddingLeft: 18, paddingRight: 18 }}>
-                    <TextInput
-                        style={{ width: "100%", height: "100%", borderRadius: 8, paddingLeft: 16, paddingRight: 16, backgroundColor: "white", elevation: 8, borderWidth: 2, borderColor: "#22B2DA", textAlignVertical: 'top' }}
-                        value={desc}
-                        onChangeText={text => setDescription(text)}
-                        placeholder="Enter a description to this homework..."
-                        maxLength={255}
-                        multiline
-                        key="desc"
-                    />
-                </View>
-                <Text style={{ marginBottom: 8, marginTop: 12, color: "black", fontSize: 18, fontWeight: "600", paddingLeft: 18, paddingRight: 18 }}>Attachment</Text>
-                <View style={{ width: "100%", height: 48, paddingLeft: 18, paddingRight: 18 }}>
-                    <TextInput
-                        style={{ width: "100%", height: "100%", borderRadius: 8, paddingLeft: 16, paddingRight: 16, backgroundColor: "white", elevation: 8, borderWidth: 2, borderColor: "#22B2DA", }}
-                        value={attach}
-                        onChangeText={text => setAttach(text)}
-                        placeholder="(e.g. Google Drive, or an image link etc.)"
-                        maxLength={255}
-                        key="attach"
-                    />
-                </View>
-                <Text style={{ marginBottom: 8, marginTop: 12, color: "black", fontSize: 18, fontWeight: "600", paddingLeft: 18, paddingRight: 18 }}>Start Date</Text>
-                <View style={{ width: "100%", paddingLeft: 18, paddingRight: 18, borderRadius: 8, overflow: "hidden" }}>
-                    <DatePicker date={startDate} onDateChange={setStartDate} />
-                </View>
-                <Text style={{ marginBottom: 8, marginTop: 12, color: "black", fontSize: 18, fontWeight: "600", paddingLeft: 18, paddingRight: 18 }}>End Date</Text>
-                <View style={{ width: "100%", paddingLeft: 18, paddingRight: 18, borderRadius: 8, overflow: "hidden", marginBottom: 24 }}>
-                    <DatePicker date={endDate} onDateChange={setEndDate} />
-                </View>
-                <Text style={{ marginBottom: 8, marginTop: 12, color: "black", fontSize: 18, fontWeight: "600", paddingLeft: 18, paddingRight: 18 }}>Estimated Solve Time</Text>
-                <View style={{ width: "100%", height: 48, paddingLeft: 18, paddingRight: 18 }}>
-                    <TextInput
-                        style={{ width: "100%", height: "100%", borderRadius: 8, paddingLeft: 16, paddingRight: 16, backgroundColor: "white", elevation: 8, borderWidth: 2, borderColor: "#22B2DA", }}
-                        value={estTime}
-                        onChangeText={text => setEstTime(text)}
-                        placeholder="Enter a time (e.g. 10 mins)"
-                        maxLength={255}
-                        key="est"
-                    />
-                </View>
-            </ScrollView>
+            <KeyboardAvoidingView style={{ flex: 1, }}>
+                <ScrollView style={{ flex: 1, }}>
+                    <Text style={{ marginBottom: 8, marginTop: 12, color: "black", fontSize: 18, fontWeight: "600", paddingLeft: 18, paddingRight: 18 }}>Title</Text>
+                    <View style={{ width: "100%", height: 48, paddingLeft: 18, paddingRight: 18 }}>
+                        <TextInput
+                            style={{ width: "100%", height: "100%", borderRadius: 8, paddingLeft: 16, paddingRight: 16, backgroundColor: "white", elevation: 8, borderWidth: 2, borderColor: "#22B2DA" }}
+                            value={title}
+                            onChangeText={text => setTitle(text)}
+                            placeholder="Enter a title to this homework..."
+                            maxLength={32}
+                            key="title"
+                        />
+                    </View>
+                    <Text style={{ marginBottom: 8, marginTop: 12, color: "black", fontSize: 18, fontWeight: "600", paddingLeft: 18, paddingRight: 18 }}>Description</Text>
+                    <View style={{ width: "100%", height: 84, paddingLeft: 18, paddingRight: 18 }}>
+                        <TextInput
+                            style={{ width: "100%", height: "100%", borderRadius: 8, paddingLeft: 16, paddingRight: 16, backgroundColor: "white", elevation: 8, borderWidth: 2, borderColor: "#22B2DA", textAlignVertical: 'top' }}
+                            value={desc}
+                            onChangeText={text => setDescription(text)}
+                            placeholder="Enter a description to this homework..."
+                            maxLength={255}
+                            multiline
+                            key="desc"
+                        />
+                    </View>
+                    <Text style={{ marginBottom: 8, marginTop: 12, color: "black", fontSize: 18, fontWeight: "600", paddingLeft: 18, paddingRight: 18 }}>Attachment</Text>
+                    <View style={{ width: "100%", height: 48, paddingLeft: 18, paddingRight: 18 }}>
+                        <TextInput
+                            style={{ width: "100%", height: "100%", borderRadius: 8, paddingLeft: 16, paddingRight: 16, backgroundColor: "white", elevation: 8, borderWidth: 2, borderColor: "#22B2DA", }}
+                            value={attach}
+                            onChangeText={text => setAttach(text)}
+                            placeholder="(e.g. Google Drive, or an image link etc.)"
+                            maxLength={255}
+                            key="attach"
+                        />
+                    </View>
+                    <Text style={{ marginBottom: 8, marginTop: 12, color: "black", fontSize: 18, fontWeight: "600", paddingLeft: 18, paddingRight: 18 }}>Start Date</Text>
+                    <View style={{ width: "100%", paddingLeft: 18, paddingRight: 18, borderRadius: 8, overflow: "hidden" }}>
+                        <DatePicker date={startDate} onDateChange={setStartDate} />
+                    </View>
+                    <Text style={{ marginBottom: 8, marginTop: 12, color: "black", fontSize: 18, fontWeight: "600", paddingLeft: 18, paddingRight: 18 }}>End Date</Text>
+                    <View style={{ width: "100%", paddingLeft: 18, paddingRight: 18, borderRadius: 8, overflow: "hidden", marginBottom: 24 }}>
+                        <DatePicker date={endDate} onDateChange={setEndDate} />
+                    </View>
+                    <Text style={{ marginBottom: 8, marginTop: 12, color: "black", fontSize: 18, fontWeight: "600", paddingLeft: 18, paddingRight: 18 }}>Estimated Solve Time</Text>
+                    <View style={{ width: "100%", height: 48, paddingLeft: 18, paddingRight: 18, marginBottom: 128, }}>
+                        <TextInput
+                            style={{ width: "100%", height: "100%", borderRadius: 8, paddingLeft: 16, paddingRight: 16, backgroundColor: "white", elevation: 8, borderWidth: 2, borderColor: "#22B2DA", }}
+                            value={estTime}
+                            onChangeText={text => setEstTime(text)}
+                            placeholder="Enter a time (e.g. 10 mins)"
+                            maxLength={255}
+                            key="est"
+                        />
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
 
             <View style={{ width: "100%", justifyContent: "flex-end", paddingBottom: 64, paddingLeft: 18, paddingRight: 18 }}>
                 <Button
-                    text={"Give"}
+                    text={"Send Homework"}
                     txtColor={"white"}
                     icon={<TickIcon width={24} height={24} fill={"#fff"} />}
                     btnColor={"#22B2DA"}

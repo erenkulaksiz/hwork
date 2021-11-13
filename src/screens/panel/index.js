@@ -43,6 +43,37 @@ const PanelScreen = (props) => {
         { key: 'completed', title: 'Completed' },
     ]);
 
+    const getCompletedHomeworks = () => {
+        const _completed = [];
+        props.reducer.student_homeworks.map(element => {
+            props.reducer.students.filter(el => el.id == props.reducer.loginAs.id)[0].completed_homework_ids.map(ele => {
+                if (ele == element.id) {
+                    _completed.push(element)
+                };
+            });
+        })
+        return _completed
+    }
+
+    const getHomeworks = () => {
+        // Dont show completed homeworks here.
+        const _homeworks = [];
+        props.reducer.student_homeworks.map(element => {
+            let thisCompleted = false;
+            props.reducer.students.filter(el => el.id == props.reducer.loginAs.id)[0].completed_homework_ids.map(ele => {
+                if (ele == element.id) thisCompleted = true;
+            });
+            if (!thisCompleted) {
+                _homeworks.push(element);
+            }
+        })
+        return _homeworks
+    }
+
+    useEffect(() => {
+
+    }, [])
+
     const HomeworkItem = ({ homework }) => {
 
         const _getRemainingTime = () => {
@@ -76,9 +107,14 @@ const PanelScreen = (props) => {
         )
     }
 
-    const _renderHomeworkItem = ({ item }) => {
+    const _renderHomeworkItem = ({ item, completed, key }) => {
         return (
-            <TouchableOpacity style={{ paddingLeft: 8, paddingRight: 8 }} activeOpacity={0.8}>
+            <TouchableOpacity
+                style={{ paddingLeft: 8, paddingRight: 8 }}
+                activeOpacity={0.8}
+                onPress={() => props.navigation.navigate("ViewHomework", { item: item, student: true, completed: completed || false })}
+                key={key}
+            >
                 <HomeworkItem homework={item} />
             </TouchableOpacity>
         )
@@ -87,21 +123,33 @@ const PanelScreen = (props) => {
     const AssignedTab = () => {
         return (
             <FlatList
-                data={props.reducer.student_homeworks}
+                data={getHomeworks()}
                 renderItem={_renderHomeworkItem}
                 style={{ flex: 1 }}
-                keyExtractor={item => item.id}
+                keyExtractor={item => item.start_time}
                 ListHeaderComponent={<View style={{ marginTop: 8 }} />}
                 ListFooterComponent={<View style={{ marginBottom: 8 }} />}
-                ListEmptyComponent={<View>
-                    <Text>No homework assigned</Text>
+                ListEmptyComponent={<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                    <Text style={{ color: "black", fontWeight: "800", fontSize: 24 }}>No homework assigned</Text>
                 </View>}
             />
         )
     }
 
     const CompletedTab = () => {
-        return (<View style={{ flex: 1, backgroundColor: '#673ab7' }} />)
+        return (
+            <FlatList
+                data={getCompletedHomeworks()}
+                renderItem={({ item }) => _renderHomeworkItem({ item: item, completed: true })}
+                style={{ flex: 1 }}
+                keyExtractor={item => item.id}
+                ListHeaderComponent={<View style={{ marginTop: 8 }} />}
+                ListFooterComponent={<View style={{ marginBottom: 8 }} />}
+                ListEmptyComponent={<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                    <Text style={{ color: "black", fontWeight: "800", fontSize: 24 }}>No homework completed</Text>
+                </View>}
+            />
+        )
     }
 
     const renderScene = SceneMap({
@@ -124,6 +172,14 @@ const PanelScreen = (props) => {
             labelStyle={{ color: "black", fontWeight: "600" }}
         />
     );
+
+    const _viewHomeworks = () => {
+        props.navigation.navigate("View", { view: "homeworks" });
+    }
+
+    const _viewStudents = () => {
+        props.navigation.navigate("View", { view: "students" });
+    }
 
     useEffect(() => {
         props.navigation.addListener('beforeRemove', (e) => {
@@ -198,7 +254,7 @@ const PanelScreen = (props) => {
                                 icon={<HatIcon width={24} height={24} fill={"#fff"} />}
                                 btnColor={"#22B2DA"}
                                 style={{ height: 54, marginBottom: 16 }}
-                                onPress={() => { }}
+                                onPress={() => _viewHomeworks()}
                             />
                             <Button
                                 text={"Students"}
@@ -206,9 +262,9 @@ const PanelScreen = (props) => {
                                 icon={<PeopleIcon width={24} height={24} fill={"#fff"} />}
                                 btnColor={"#22B2DA"}
                                 style={{ height: 54 }}
-                                onPress={() => { }}
+                                onPress={() => _viewStudents()}
                             />
-                            <View style={{ marginBottom: 12, marginTop: 24, flexDirection: "row", alignItems: "center" }}>
+                            <View style={{ marginBottom: 12, marginTop: 12, flexDirection: "row", alignItems: "center" }}>
                                 <ControlsIcon width={20} height={20} fill={"#000"} />
                                 <Text style={styles.controlsTitle}>Controls</Text>
                             </View>
@@ -220,14 +276,18 @@ const PanelScreen = (props) => {
                                 style={{ height: 54, marginBottom: 16 }}
                                 onPress={() => props.navigation.navigate("Controls", { giveHomework: true })}
                             />
-                            <Button
-                                text={"Add/Delete students"}
-                                txtColor={"white"}
-                                icon={<GroupIcon width={24} height={24} fill={"#fff"} />}
-                                btnColor={"#22B2DA"}
-                                style={{ height: 54 }}
-                                onPress={() => { }}
-                            />
+                            {
+                                /*
+                                <Button
+                                    text={"Add/Delete students"}
+                                    txtColor={"white"}
+                                    icon={<GroupIcon width={24} height={24} fill={"#fff"} />}
+                                    btnColor={"#22B2DA"}
+                                    style={{ height: 54 }}
+                                    onPress={() => _viewStudents()}
+                                />
+                                */
+                            }
                         </View>
                     }
                 </View>

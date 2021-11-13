@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { persistCombineReducers } from 'redux-persist';
+import _ from 'lodash';
 
 // Reducers
 import local from './local';
@@ -15,6 +16,7 @@ const INITIAL_STATE = {
     teachers: [],
     homeworks: [],
     student_homeworks: [],
+    homework_select_all: false,
     loginInputs: {
         idInput: "",
         nameInput: "",
@@ -50,15 +52,31 @@ const mainReducer = (state = INITIAL_STATE, action) => {
 
         case 'SET_ALL_HOMEWORKS':
             console.log("all homeworks has been set!");
+            const getStudentHomeworks = [];
 
-            // Get user id then set his homeworks simulating backend
-            const student_homeworks = (state.loginAs.student == true && (state.loginAs.name ? action.payload.filter(element => element.assigned_id == state.loginAs.id) : []));
-            console.log("Student homeworks: ", student_homeworks);
+            if (state.loginAs.student) {
+                action.payload.map(el => {
+                    if (el.assigned_id.length > 1) {
+                        //array
+                        el.assigned_id.map(element => {
+                            if (element == state.loginAs.id) {
+                                getStudentHomeworks.push(el);
+                            }
+                        })
+                    } else {
+                        if (el.assigned_id == state.loginAs.id) {
+                            getStudentHomeworks.push(el);
+                        }
+                    }
+                });
+                console.log("Homeworks: ", getStudentHomeworks);
+            }
+
 
             return {
                 ...state,
                 homeworks: action.payload,
-                student_homeworks: student_homeworks,
+                student_homeworks: [...getStudentHomeworks],
             }
 
         case 'SET_ALL_TEACHERS':
@@ -66,6 +84,29 @@ const mainReducer = (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 teachers: action.payload,
+            }
+
+        case 'SELECT_STUDENT_INDEX':
+
+            /*
+                const arrIndex = _.findIndex(state.students, (e) => {
+                    return e.id == action.payload.id;
+                }, 0);*/
+
+            console.log("index: ", action.payload);
+
+            state.students[action.payload] = { ...state.students[action.payload], selected: state.students[action.payload].selected == true ? false : true };
+
+            return {
+                ...state,
+            }
+
+        case 'SELECT_ALL':
+
+            state.homework_select_all = !state.homework_select_all;
+
+            return {
+                ...state,
             }
 
         default:

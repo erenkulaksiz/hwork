@@ -13,6 +13,7 @@ import styles from './style';
 import LogoutIcon from '../../icons/logout.svg';
 import PeopleIcon from '../../icons/people.svg';
 import ArrowIcon from '../../icons/arrow.svg';
+import TickIcon from '../../icons/done.svg';
 
 import BottomImage from '../../images/bottom.png';
 
@@ -22,14 +23,20 @@ import Header from '../../components/header';
 
 const ControlsScreen = (props) => {
 
-    const [selectedStudents, setSelectedStudents] = useState([]);
-
-    // props.navigation.navigate("GiveHomework", { ...item })
+    const getTeacherStudents = () => {
+        const students = [];
+        const teacher = props.reducer.teachers.filter(element => element.id == props.reducer.loginAs.id);
+        console.log("Teahcer: ", teacher[0]);
+        teacher[0].students_id.map(student_id => {
+            students.push(props.reducer.students.filter(element => element.id == student_id)[0]);
+        })
+        console.log("Students: ", students);
+        return students
+    }
 
     const StudentItem = ({ student }) => {
 
-        const studentSelected = selectedStudents.filter(element => element.id == student.id).length != 0;
-
+        const studentSelected = student.selected == true || props.reducer.homework_select_all;
 
         return (
             <View style={{ width: "100%", height: 100, padding: 12 }}>
@@ -39,8 +46,10 @@ const ControlsScreen = (props) => {
                     </View>
                     <Text style={{ color: "black", marginLeft: 8, fontSize: 20, fontWeight: "600" }}>{student.name}</Text>
                     <View style={{ flex: 1, height: "100%", justifyContent: "center", alignItems: "flex-end" }}>
-                        <View style={{ width: 40, height: 40, borderRadius: 64, borderWidth: 2, borderColor: studentSelected ? "green" : "#939393" }}>
-
+                        <View style={{ width: 40, height: 40, borderRadius: 64, borderWidth: 2, borderColor: studentSelected ? "green" : "#939393", justifyContent: "center", alignItems: "center" }}>
+                            {
+                                studentSelected && <TickIcon width={28} height={28} fill={"green"} />
+                            }
                         </View>
                     </View>
                 </View>
@@ -53,30 +62,16 @@ const ControlsScreen = (props) => {
     }
 
     const selectStudent = ({ item }) => {
-        // Check if student already has been added.
-        if (selectedStudents.filter(element => element.id == item.id).length == 0) {
-            setSelectedStudents([...selectedStudents, { ...item }]);
-            console.log("New students: ", selectedStudents);
-        } else {
-
-            let aaa = selectedStudents;
-            aaa.splice(aaa.filter(ele => ele.id == item.id), 1);
-            console.log("aaa", aaa);
-
-            const newar = _.remove(selectedStudents, function (el) {
-                return el.id == item.id
-            })
-            setSelectedStudents(aaa);
-            console.log("selectedStudents ", aaa);
-        }
+        props.dispatch({ type: "SELECT_STUDENT_INDEX", payload: item });
     }
 
-    const _renderStudentItem = ({ item }) => {
+    const _renderStudentItem = (item, index) => {
         return (
             <TouchableOpacity
                 style={{ marginLeft: 16, marginRight: 16, marginBottom: 8, elevation: 8, backgroundColor: "white", borderRadius: 8 }}
                 activeOpacity={0.70}
-                onPress={() => selectStudent({ item: item })}
+                onPress={() => { }/*selectStudent({ item: index })*/}
+                key={item.key}
             >
                 <StudentItem student={item} />
             </TouchableOpacity>
@@ -84,7 +79,11 @@ const ControlsScreen = (props) => {
     }
 
     const _selectAll = () => {
+        props.dispatch({ type: "SELECT_ALL" });
+    }
 
+    const _giveHomework = () => {
+        props.navigation.navigate("GiveHomework");
     }
 
     return (
@@ -97,7 +96,7 @@ const ControlsScreen = (props) => {
                         <Text style={{ color: "black", fontSize: 24, marginLeft: 8 }}>Students</Text>
                         <View style={{ flex: 1, flexDirection: "row", justifyContent: "flex-end" }}>
                             <Button
-                                text={"Select All"}
+                                text={props.reducer.homework_select_all ? "Unselect All" : "Select All"}
                                 txtColor={"white"}
                                 btnColor={"#22B2DA"}
                                 onPress={() => _selectAll()}
@@ -106,8 +105,8 @@ const ControlsScreen = (props) => {
                         </View>
                     </View>
                     <FlatList
-                        data={props.reducer.students}
-                        renderItem={_renderStudentItem}
+                        data={getTeacherStudents()}
+                        renderItem={({ item, index }) => _renderStudentItem(item, index)}
                         style={{ flex: 1 }}
                         keyExtractor={item => item.id}
                         ListHeaderComponent={<View style={{ marginTop: 8 }} />}
@@ -115,14 +114,26 @@ const ControlsScreen = (props) => {
                     />
                 </View>
             }
-            <View style={{ position: "absolute", bottom: 0, width: "100%", padding: 18 }}>
+            <View style={{ position: "absolute", bottom: 0, width: "100%", padding: 16, flexDirection: "row", justifyContent: "space-between" }}>
                 <Button
                     text={"Back"}
                     txtColor={"white"}
                     icon={<ArrowIcon width={24} height={24} fill={"#fff"} style={{ transform: [{ rotate: '180deg' }] }} />}
                     btnColor={"#22B2DA"}
+                    style={{ width: props.reducer.homework_select_all ? "48%" : "100%" }}
                     onPress={() => props.navigation.goBack()}
                 />
+                {
+                    props.reducer.homework_select_all && <Button
+                        text={"Give Homework"}
+                        txtColor={"white"}
+                        icon={<TickIcon width={24} height={24} fill={"#fff"} />}
+                        btnColor={"#22B2DA"}
+                        style={{ width: "48%" }}
+                        onPress={() => _giveHomework()}
+                    />
+                }
+
             </View>
             <View style={{ position: "absolute", bottom: -64, width: "100%", zIndex: -1 }}>
                 <Image source={BottomImage} />

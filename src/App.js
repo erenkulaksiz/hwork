@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { StatusBar } from 'react-native';
+import { StatusBar, LogBox } from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistStore } from 'redux-persist';
@@ -17,6 +17,10 @@ import SelectiveLoginScreen from './screens/selectivelogin';
 import PanelScreen from './screens/panel';
 import ControlsScreen from './screens/controls';
 import GiveHomeworkScreen from './screens/giveHomework';
+import ViewScreen from './screens/view';
+import ViewHomeworkScreen from './screens/viewHomework';
+import CompleteHomeworkScreen from './screens/completeHomework'
+import ReviewHomeworkScreen from './screens/reviewHomework';
 
 const persistor = persistStore(store);
 const Stack = createStackNavigator();
@@ -25,6 +29,7 @@ const navigationRef = createNavigationContainerRef()
 const App = (props) => {
 
     useEffect(() => {
+        LogBox.ignoreAllLogs();
         StatusBar.setBackgroundColor("#22B2DA");
         API.getAllStudents().then(response => {
             store.dispatch({ type: "SET_STUDENTS", payload: response });
@@ -78,6 +83,22 @@ const App = (props) => {
                         <Stack.Screen
                             name="GiveHomework"
                             component={GiveHomeworkScreen}
+                        />
+                        <Stack.Screen
+                            name="View"
+                            component={ViewScreen}
+                        />
+                        <Stack.Screen
+                            name="ViewHomework"
+                            component={ViewHomeworkScreen}
+                        />
+                        <Stack.Screen
+                            name="CompleteHomework"
+                            component={CompleteHomeworkScreen}
+                        />
+                        <Stack.Screen
+                            name="ReviewHomework"
+                            component={ReviewHomeworkScreen}
                         />
                     </Stack.Navigator>
                 </NavigationContainer>
