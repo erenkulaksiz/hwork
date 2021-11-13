@@ -4,8 +4,13 @@ export default StyleSheet.create({
     container: {
         flex: 1,
     },
-    titleWrapper:{
+    titleWrapper: {
         width: "100%",
         backgroundColor: "blue",
+    },
+    content: {
+        paddingLeft: 18,
+        paddingRight: 18,
+        flex: 1,
     }
 });

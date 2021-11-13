@@ -20,17 +20,11 @@ const LoginScreen = (props) => {
     const pager = useRef(PagerView);
     const pager2 = useRef(PagerView);
 
-    // @desc         | navigates to according page with parameters screen & action
-
     // @param screen | has value of 1 or 2, 1 meaning log in, 2 meaning sign up
     // @param action | can have values "student", "teacher", "principle" according to action
     const _selectiveLogin = ({ screen, action }) => {
         props.navigation.navigate('SelectiveLogin', { screen: screen, action: action });
     }
-
-    useEffect(() => {
-
-    }, [])
 
     return (
         <View style={styles.container}>

@@ -1,11 +1,11 @@
 
 const INITIAL_STATE = {
-    loggedIn: false,
+    loggedIn: {}
 };
 
 export default (state = INITIAL_STATE, action) => {
     switch (action.type) {
-        case 'SET_LOGGED_IN':
+        case 'SET_LOCAL_LOGGED_IN':
 
             console.log("SET_LOGGED_IN: ", action.payload)
 

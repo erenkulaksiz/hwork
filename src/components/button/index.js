@@ -9,7 +9,7 @@ const Button = ({ icon, text, btnColor = "#1CC794", txtColor = "#fff", onPress, 
         <TouchableOpacity onPress={onPress} style={{ ...styles.container, backgroundColor: btnColor, ...style, overflow: "hidden" }} activeOpacity={0.60}>
             <View style={styles.content}>
                 {icon}
-                <Text style={{ ...styles.text, color: txtColor }}>{text}</Text>
+                <Text style={{ ...styles.text, color: txtColor, marginLeft: icon ? 8 : 0, }}>{text}</Text>
             </View>
             {
                 isLoading && <View style={styles.loadingContainer}>
