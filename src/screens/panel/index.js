@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, TouchableOpacity, Image, TextInput, FlatList, useWindowDimensions } from 'react-native';
+import { Text, View, TouchableOpacity, Image, FlatList, useWindowDimensions } from 'react-native';
 import { connect } from 'react-redux';
 import pretty from 'pretty-ms';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
@@ -11,16 +11,13 @@ import API from '../../classes/api';
 import styles from './style';
 
 // Icons
-import LoginIcon from '../../icons/login.svg';
 import LogoutIcon from '../../icons/logout.svg';
-import ArrowRightIcon from '../../icons/arrow.svg';
 import PersonIcon from '../../icons/person.svg';
 import LectureIcon from '../../icons/school.svg';
 import TimeIcon from '../../icons/time.svg';
 import SubjectIcon from '../../icons/subject.svg';
 import CalendarIcon from '../../icons/calendar.svg';
 import AddIcon from '../../icons/add.svg';
-import GroupIcon from '../../icons/group.svg';
 import HatIcon from '../../icons/principle.svg';
 import EyeIcon from '../../icons/eye.svg';
 import ControlsIcon from '../../icons/controls.svg';
@@ -126,7 +123,7 @@ const PanelScreen = (props) => {
                 data={getHomeworks()}
                 renderItem={_renderHomeworkItem}
                 style={{ flex: 1 }}
-                keyExtractor={item => item.start_time}
+                keyExtractor={item => item.id}
                 ListHeaderComponent={<View style={{ marginTop: 8 }} />}
                 ListFooterComponent={<View style={{ marginBottom: 8 }} />}
                 ListEmptyComponent={<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -173,12 +170,16 @@ const PanelScreen = (props) => {
         />
     );
 
-    const _viewHomeworks = () => {
-        props.navigation.navigate("View", { view: "homeworks" });
+    const _viewHomeworks = ({ viewFrom = "teacher" }) => {
+        props.navigation.navigate("View", { view: "homeworks", viewFrom: viewFrom });
     }
 
-    const _viewStudents = () => {
-        props.navigation.navigate("View", { view: "students" });
+    const _viewStudents = ({ viewFrom = "teacher" }) => {
+        props.navigation.navigate("View", { view: "students", viewFrom: viewFrom });
+    }
+
+    const _viewTeachers = ({ viewFrom = "principle" }) => {
+        props.navigation.navigate("View", { view: "teachers", viewFrom: viewFrom });
     }
 
     useEffect(() => {
@@ -209,7 +210,7 @@ const PanelScreen = (props) => {
                                         props.reducer.loginAs && <View style={{ flexDirection: "row", alignItems: "center", }}>
                                             <PersonIcon width={18} height={18} fill={"#000"} />
                                             <Text style={{ marginLeft: 8, color: "black" }}>
-                                                {props.reducer.loginAs.student && "Student"}{props.reducer.loginAs.teacher && "Teacher"}{props.reducer.loginAs.principle && "Principle"} · {props.reducer.loginAs.class}{props.reducer.loginAs.teacher && <Text> · <HatIcon width={16} height={16} fill={"#000"} style={{ marginRight: 8 }} /></Text>}{props.reducer.loginAs.teacher && " " + props.reducer.loginAs.lecture}</Text>
+                                                {props.reducer.loginAs.student && "Student ·"}{props.reducer.loginAs.teacher && "Teacher"}{props.reducer.loginAs.principle && "Principle"} {props.reducer.loginAs.class}{props.reducer.loginAs.teacher && <Text> · <HatIcon width={16} height={16} fill={"#000"} style={{ marginRight: 8 }} /></Text>}{props.reducer.loginAs.teacher && " " + props.reducer.loginAs.lecture}</Text>
                                         </View>
                                     }
                                 </View>
@@ -243,7 +244,6 @@ const PanelScreen = (props) => {
                     }
                     {
                         props.reducer.loginAs.teacher && <View style={{ flex: 1, paddingLeft: 24, paddingRight: 24, paddingTop: 8 }}>
-
                             <View style={{ marginBottom: 12, flexDirection: "row", alignItems: "center" }}>
                                 <EyeIcon width={20} height={20} fill={"#000"} />
                                 <Text style={styles.controlsTitle}>View</Text>
@@ -254,7 +254,7 @@ const PanelScreen = (props) => {
                                 icon={<HatIcon width={24} height={24} fill={"#fff"} />}
                                 btnColor={"#22B2DA"}
                                 style={{ height: 54, marginBottom: 16 }}
-                                onPress={() => _viewHomeworks()}
+                                onPress={() => _viewHomeworks({ viewFrom: "teacher" })}
                             />
                             <Button
                                 text={"Students"}
@@ -262,7 +262,7 @@ const PanelScreen = (props) => {
                                 icon={<PeopleIcon width={24} height={24} fill={"#fff"} />}
                                 btnColor={"#22B2DA"}
                                 style={{ height: 54 }}
-                                onPress={() => _viewStudents()}
+                                onPress={() => _viewStudents({ viewFrom: "teacher" })}
                             />
                             <View style={{ marginBottom: 12, marginTop: 12, flexDirection: "row", alignItems: "center" }}>
                                 <ControlsIcon width={20} height={20} fill={"#000"} />
@@ -288,6 +288,40 @@ const PanelScreen = (props) => {
                                 />
                                 */
                             }
+                        </View>
+                    }
+
+                    {
+                        props.reducer.loginAs.principle && <View style={{ flex: 1, paddingLeft: 24, paddingRight: 24, paddingTop: 8 }}>
+                            <View style={{ marginBottom: 12, marginTop: 12, flexDirection: "row", alignItems: "center" }}>
+                                <ControlsIcon width={20} height={20} fill={"#000"} />
+                                <Text style={styles.controlsTitle}>Controls</Text>
+                            </View>
+                            <Button
+                                text={"Homeworks"}
+                                txtColor={"white"}
+                                icon={<HatIcon width={24} height={24} fill={"#fff"} />}
+                                btnColor={"#22B2DA"}
+                                style={{ height: 54, marginBottom: 16 }}
+                                onPress={() => _viewHomeworks({ viewFrom: "principle" })}
+                            />
+                            <Button
+                                text={"Students"}
+                                txtColor={"white"}
+                                icon={<PeopleIcon width={24} height={24} fill={"#fff"} />}
+                                btnColor={"#22B2DA"}
+                                style={{ height: 54, marginBottom: 16 }}
+                                onPress={() => _viewStudents({ viewFrom: "principle" })}
+                            />
+                            <Button
+                                text={"Teachers"}
+                                txtColor={"white"}
+                                icon={<PeopleIcon width={24} height={24} fill={"#fff"} />}
+                                btnColor={"#22B2DA"}
+                                style={{ height: 54 }}
+                                onPress={() => _viewTeachers({ viewFrom: "principle" })}
+                            />
+
                         </View>
                     }
                 </View>

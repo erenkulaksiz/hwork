@@ -107,11 +107,13 @@ const ViewHomeworkScreen = (props) => {
             ],
             {
                 cancelable: true,
-                onDismiss: () =>
-                    Alert.alert(
-                        "This alert was dismissed by tapping outside of the alert dialog."
-                    ),
             });
+    }
+
+    const getHomeworkTeacher = (teacher) => {
+        return props.reducer.teachers.filter(element => {
+            return element.id == props.route.params.item.teacher_id
+        })[0]
     }
 
     return (
@@ -140,15 +142,19 @@ const ViewHomeworkScreen = (props) => {
                         onPress={() => _removeHomework({ item: props.route.params.item })}
                     />
                 }
-                <View style={{ width: "100%", marginTop: 16, }}>
+                <View style={{ width: "100%", marginTop: 8, }}>
+                    <Text style={{ color: "#4D4D4D", fontWeight: "400", fontSize: 16 }}>Teacher</Text>
+                    <Text style={{ color: "black", fontWeight: "800", fontSize: 24 }}>{getHomeworkTeacher(props.route.params.item.id).name}</Text>
+                </View>
+                <View style={{ width: "100%", marginTop: 8, }}>
                     <Text style={{ color: "#4D4D4D", fontWeight: "400", fontSize: 16 }}>Lecture</Text>
                     <Text style={{ color: "black", fontWeight: "800", fontSize: 24 }}>{props.route.params.item.lecture}</Text>
                 </View>
-                <View style={{ width: "100%", marginTop: 16, }}>
+                <View style={{ width: "100%", marginTop: 8, }}>
                     <Text style={{ color: "#4D4D4D", fontWeight: "400", fontSize: 16 }}>Title</Text>
                     <Text style={{ color: "black", fontWeight: "800", fontSize: 24 }}>{props.route.params.item.title}</Text>
                 </View>
-                <View style={{ width: "100%", marginTop: 16, }}>
+                <View style={{ width: "100%", marginTop: 8, }}>
                     <Text style={{ color: "#4D4D4D", fontWeight: "400", fontSize: 16 }}>Description</Text>
                     <Text style={{ color: "black", fontWeight: "800", fontSize: 18 }}>{props.route.params.item.desc}</Text>
                 </View>
@@ -183,6 +189,7 @@ const ViewHomeworkScreen = (props) => {
                     </View>
                     <View style={{ flex: 1, }}>
                         <TouchableOpacity style={{ flex: 1, }} onPress={() => Linking.openURL(props.route.params.item.payload)}>
+                            <Text style={{ color: "black", fontSize: 14, fontWeight: "600" }}>{props.route.params.item.payload}</Text>
                             <Image source={{ uri: props.route.params.item.payload }} style={{ flex: 1 }} resizeMode={"center"} />
                         </TouchableOpacity>
                     </View>

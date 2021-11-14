@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Text, View, TouchableOpacity, Image, TextInput, FlatList, ScrollView } from 'react-native';
+import React from 'react';
+import { Text, View, TouchableOpacity, Image, FlatList, Alert } from 'react-native';
 import { connect } from 'react-redux';
 import pretty from 'pretty-ms';
 
@@ -17,6 +17,7 @@ import TimeIcon from '../../icons/time.svg';
 import SubjectIcon from '../../icons/subject.svg';
 import CalendarIcon from '../../icons/calendar.svg';
 import ArrowIcon from '../../icons/arrow.svg';
+import AddIcon from '../../icons/add.svg';
 
 import BottomImage from '../../images/bottom.png';
 
@@ -27,19 +28,75 @@ import Header from '../../components/header';
 const ViewScreen = (props) => {
 
     const getTeacherHomeworks = () => {
-        return props.reducer.homeworks.filter(element => {
-            return element.teacher_id == props.reducer.loginAs.id && element
-        })
+        if (props.route.params.viewFrom == "principle") {
+            return props.reducer.homeworks
+        } else {
+            return props.reducer.homeworks.filter(element => {
+                return element.teacher_id == props.reducer.loginAs.id && element
+            })
+        }
     }
 
     const getTeacherStudents = () => {
         const students = [];
-        const teacher = props.reducer.teachers.filter(element => element.id == props.reducer.loginAs.id);
-        console.log("Teahcer: ", teacher[0]);
-        teacher[0].students_id.map(student_id => {
-            students.push(props.reducer.students.filter(element => element.id == student_id));
-        })
-        return students
+
+        if (props.route.params.viewFrom == "principle" && props.route.params.teacher) {
+            console.log("teacher: ", props.route.params.teacher);
+            props.route.params.teacher.students_id.map((el) => {
+                const findStudents = props.reducer.students.filter((ele) => ele.id == el)[0];
+                if (findStudents != null) students.push(findStudents);
+            })
+            console.log("students: ", students);
+            return students
+        }
+
+        if (props.route.params.viewFrom == "principle") {
+            return props.reducer.students.sort((a, b) => a.class > b.class)
+        } else {
+            const teacher = props.reducer.teachers.filter(element => element.id == props.reducer.loginAs.id)[0];
+            console.log("Teahcer: ", teacher);
+            teacher.students_id.map(student_id => {
+                students.push(props.reducer.students.filter(element => element.id == student_id)[0]);
+            })
+            return students.sort((a, b) => a.class > b.class)
+        }
+    }
+
+    const removeStudent = ({ item }) => {
+        // only principle can use this
+
+        if (props.route.params.viewFrom == "principle") {
+            console.log("Removing item: ", item);
+
+            Alert.alert(
+                "Are you sure?",
+                "You are deleting student " + item.name + " are you sure?",
+                [
+                    {
+                        text: "Cancel",
+                        style: "cancel",
+                    },
+                    {
+                        text: "Yes",
+                        onPress: () => {
+                            API.removeStudent({ student: item }).then(response => {
+                                console.log("Remove response: ", response);
+                                // getting all students again
+                                API.getAllStudents().then(students => {
+                                    props.dispatch({ type: "SET_STUDENTS", payload: students });
+
+                                }).catch(err => console.error(err));
+                            })
+                        },
+                        style: "okay",
+                    },
+                ],
+                {
+                    cancelable: true,
+                });
+
+
+        }
     }
 
     const HomeworkItem = ({ homework }) => {
@@ -93,26 +150,49 @@ const ViewScreen = (props) => {
                     <Text style={{ marginLeft: 8, fontSize: 18, color: "black" }}>{student.name}</Text>
                 </View>
                 <View style={{ marginTop: 6 }}>
-                    <Text>Class: {student.class}</Text>
+                    <Text style={{ color: "black", fontWeight: "600" }}>Class: {student.class}</Text>
                 </View>
             </View>
         )
     }
 
-
     const _renderStudentItem = ({ item }) => {
+        return (
+            <TouchableOpacity style={{ paddingLeft: 8, paddingRight: 8 }} activeOpacity={0.8} onPress={() => removeStudent({ item: item })}>
+                <StudentItem student={item} />
+            </TouchableOpacity>
+        )
+    }
 
+    const TeacherItem = ({ teacher }) => {
+        return (
+            <View style={{ ...styles.homeworkItem, height: 120 }}>
+                <View style={{ width: "100%", flexDirection: "row", alignItems: "center" }}>
+                    <View style={{ width: 44, height: 44 }}>
+                        <Image source={{ uri: teacher.avatar || "https://www.euroteks.com.tr/wp-content/uploads/2013/05/765-default-avatar.png" }} style={{ width: "100%", height: "100%", borderRadius: 32 }} />
+                    </View>
+                    <Text style={{ marginLeft: 8, fontSize: 18, color: "black" }}>{teacher.name}</Text>
+                </View>
+                <View style={{ marginTop: 6 }}>
+                    <Text style={{ color: "black" }}>Class: <Text style={{ fontWeight: "800" }}>{teacher.class}</Text></Text>
+                </View>
+                <View style={{ marginTop: 6 }}>
+                    <Text style={{ color: "black" }}>Lecture: <Text style={{ fontWeight: "800" }}>{teacher.lecture}</Text></Text>
+                </View>
+            </View>
+        )
+    }
 
-        if (item.length > 0) {
+    const _renderTeacherItem = ({ item }) => {
+        return (
+            <TouchableOpacity style={{ paddingLeft: 8, paddingRight: 8 }} activeOpacity={0.8} onPress={() => props.navigation.navigate("View", { view: "students", viewFrom: "principle", teacher: item })}>
+                <TeacherItem teacher={item} />
+            </TouchableOpacity>
+        )
+    }
 
-            console.log("item: ", item);
-            return (
-                <TouchableOpacity style={{ paddingLeft: 8, paddingRight: 8 }} activeOpacity={0.8}>
-                    <StudentItem student={item[0]} />
-                </TouchableOpacity>
-            )
-        }
-
+    const getAllTeachers = () => {
+        return props.reducer.teachers
     }
 
     return (
@@ -137,7 +217,7 @@ const ViewScreen = (props) => {
                         </View>}
                     />
 
-                </View> : props.route.params.view == "students" && <View style={{ flex: 1, paddingLeft: 18, paddingRight: 18 }}>
+                </View> : props.route.params.view == "students" ? <View style={{ flex: 1, paddingLeft: 18, paddingRight: 18, }}>
                     <View style={{ width: "100%", flexDirection: "row", alignItems: "center" }}>
                         <PersonIcon width={24} height={24} fill={"#000"} />
                         <Text style={{ marginLeft: 14, color: "black", fontSize: 24, fontWeight: "600" }}>Students</Text>
@@ -146,11 +226,42 @@ const ViewScreen = (props) => {
                         data={getTeacherStudents()}
                         renderItem={_renderStudentItem}
                         style={{ flex: 1 }}
-                        keyExtractor={item => item.id + item.name}
+                        keyExtractor={item => item.id}
                         ListHeaderComponent={<View style={{ marginTop: 8 }} />}
                         ListFooterComponent={<View style={{ marginBottom: 64 }} />}
                         ListEmptyComponent={<View>
                             <Text>No students assigned</Text>
+                        </View>}
+                    />
+                </View> : props.route.params.view == "teachers" && <View style={{ flex: 1, paddingLeft: 18, paddingRight: 18, }}>
+                    <View style={{ width: "100%", flexDirection: "row", alignItems: "center" }}>
+                        <PersonIcon width={24} height={24} fill={"#000"} />
+                        <Text style={{ marginLeft: 14, color: "black", fontSize: 24, fontWeight: "600" }}>Teachers</Text>
+                        {
+                            /*
+                                <View style={{ flex: 1, paddingLeft: 16, }}>
+                                    <Button
+                                        text={"Add Teacher"}
+                                        txtColor={"white"}
+                                        icon={<AddIcon width={24} height={24} fill={"#fff"} style={{ transform: [{ rotate: '180deg' }] }} />}
+                                        btnColor={"#22B2DA"}
+                                        style={{ width: "100%" }}
+                                        onPress={() => props.navigation.navigate("AddTeacher")}
+                                    />
+                                </View>
+                            */
+                        }
+
+                    </View>
+                    <FlatList
+                        data={getAllTeachers()}
+                        renderItem={_renderTeacherItem}
+                        style={{ flex: 1 }}
+                        keyExtractor={item => item.id}
+                        ListHeaderComponent={<View style={{ marginTop: 8 }} />}
+                        ListFooterComponent={<View style={{ marginBottom: 64 }} />}
+                        ListEmptyComponent={<View>
+                            <Text>No teachers found</Text>
                         </View>}
                     />
                 </View>

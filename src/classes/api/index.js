@@ -115,6 +115,28 @@ const API = {
             }).then(response => resolve(response.json()));
         });
     },
+    getAllPrinciple() {
+        return new Promise((resolve, reject) => {
+            fetch(Config.API_ROUTE + '/principle', {
+                method: 'GET',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+            }).then(response => resolve(response.json()));
+        });
+    },
+    removeStudent({ student }) {
+        return new Promise((resolve, reject) => {
+            fetch(Config.API_ROUTE + '/students/' + student.id, {
+                method: 'DELETE',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+            }).then(response => resolve(response.json()));
+        });
+    }
 }
 
 export default API;

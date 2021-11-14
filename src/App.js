@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { StatusBar, LogBox } from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
 import { PersistGate } from 'redux-persist/integration/react';
@@ -21,6 +21,7 @@ import ViewScreen from './screens/view';
 import ViewHomeworkScreen from './screens/viewHomework';
 import CompleteHomeworkScreen from './screens/completeHomework'
 import ReviewHomeworkScreen from './screens/reviewHomework';
+import AddTeacherScreen from './screens/addTeacher';
 
 const persistor = persistStore(store);
 const Stack = createStackNavigator();
@@ -31,13 +32,16 @@ const App = (props) => {
     useEffect(() => {
         LogBox.ignoreAllLogs();
         StatusBar.setBackgroundColor("#22B2DA");
-        API.getAllStudents().then(response => {
-            store.dispatch({ type: "SET_STUDENTS", payload: response });
-            API.getAllHomeworks().then(response => {
-                store.dispatch({ type: "SET_ALL_HOMEWORKS", payload: response });
-                API.getAllTeachers().then(response => {
-                    store.dispatch({ type: "SET_ALL_TEACHERS", payload: response });
-                    SplashScreen.hide();
+        API.getAllStudents().then(students => {
+            store.dispatch({ type: "SET_STUDENTS", payload: students });
+            API.getAllHomeworks().then(homeworks => {
+                store.dispatch({ type: "SET_ALL_HOMEWORKS", payload: homeworks });
+                API.getAllTeachers().then(teachers => {
+                    store.dispatch({ type: "SET_ALL_TEACHERS", payload: teachers });
+                    API.getAllPrinciple().then(principle => {
+                        store.dispatch({ type: "SET_ALL_PRINCIPLE", payload: principle });
+                        SplashScreen.hide();
+                    })
                 });
             });
             if (store.getState().local.loggedIn.name) {
@@ -45,7 +49,6 @@ const App = (props) => {
                 navigationRef.navigate('Panel');
             }
         }).catch(err => console.error(err));
-
     }, [])
 
     return (
@@ -99,6 +102,10 @@ const App = (props) => {
                         <Stack.Screen
                             name="ReviewHomework"
                             component={ReviewHomeworkScreen}
+                        />
+                        <Stack.Screen
+                            name="AddTeacher"
+                            component={AddTeacherScreen}
                         />
                     </Stack.Navigator>
                 </NavigationContainer>

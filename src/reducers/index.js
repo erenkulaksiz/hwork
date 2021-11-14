@@ -15,6 +15,7 @@ const INITIAL_STATE = {
     students: [],
     teachers: [],
     homeworks: [],
+    principle: [],
     student_homeworks: [],
     homework_select_all: false,
     loginInputs: {
@@ -84,6 +85,13 @@ const mainReducer = (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 teachers: action.payload,
+            }
+
+        case 'SET_ALL_PRINCIPLE':
+            console.log("all principle has been set");
+            return {
+                ...state,
+                principle: action.payload,
             }
 
         case 'SELECT_STUDENT_INDEX':

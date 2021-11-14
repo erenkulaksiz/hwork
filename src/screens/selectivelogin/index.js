@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Text, View, TouchableOpacity, Image, TextInput } from 'react-native';
+import { Text, View, Image, TextInput } from 'react-native';
 import { connect } from 'react-redux';
 import { Picker } from '@react-native-picker/picker';
 
@@ -74,12 +74,36 @@ const SelectiveLoginScreen = (props) => {
             } else {
                 alert("Please enter a valid ID.");
             }
+        } else if (props.route.params.action == "principle") {
+            if (loginId == 0 || loginId == "" || loginId == null || loginId.length > 2) {
+                alert("Please enter a valid ID.");
+                return;
+            }
+
+            const principle = props.reducer.principle.filter(element => element.id == loginId);
+
+            if (principle.length != 0) {
+                API.getAllHomeworks().then(response => {
+                    props.dispatch({ type: "SET_ALL_HOMEWORKS", payload: response });
+                    props.dispatch({ type: "SET_LOGIN_AS", payload: { ...principle[0], principle: true } });
+                    props.dispatch({ type: "SET_LOCAL_LOGGED_IN", payload: { ...principle[0], principle: true } });
+                    props.navigation.navigate('Panel');
+                })
+            } else {
+                alert("Please enter a valid ID.");
+            }
         }
     }
 
     const signUpPress = () => {
         if (!loadingSignup) {
             setLoadingSignup(true);
+
+            if (signupName == "" || signupName.length < 2) {
+                alert("Please enter a valid name.");
+                return;
+            }
+
             const teachers = props.reducer.teachers.filter(el => {
                 return el.class == selectedClass;
             });
@@ -96,9 +120,7 @@ const SelectiveLoginScreen = (props) => {
 
                 console.log("New teachers: ", newTeachers);
 
-
                 Promise.all([API.updateTeachers({ teacher: newTeachers[0] }), API.updateTeachers({ teacher: newTeachers[1] })]).then((values) => {
-                    console.log("AAAAAAAAAAA", values);
                     API.getAllStudents().then(responseReg => {
                         props.dispatch({ type: "SET_STUDENTS", payload: responseReg });
                         API.getAllTeachers().then(responseTeac => {
@@ -118,9 +140,14 @@ const SelectiveLoginScreen = (props) => {
         <View style={styles.container}>
             <Header />
             <View style={styles.content}>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <LoginIcon width={32} height={32} fill={"#000"} />
-                    <Text style={{ color: "black", fontSize: 24, fontWeight: "600", marginLeft: 8 }}>{props.route.params.screen == 1 ? "Log in" : "Sign Up"}</Text>
+                <View style={{ alignItems: "center", flexDirection: "column" }}>
+                    <View style={{ width: "100%", flexDirection: "row" }}>
+                        <LoginIcon width={32} height={32} fill={"#000"} />
+                        <Text style={{ color: "black", fontSize: 24, fontWeight: "600", marginLeft: 8 }}>{props.route.params.screen == 1 ? "Log in" : "Sign Up"}</Text>
+                    </View>
+                    <View style={{ width: "100%", }}>
+                        <Text style={{ fontSize: 16, fontWeight: "600", color: "black" }}>as a {props.route.params.action}</Text>
+                    </View>
                 </View>
 
                 {
@@ -143,7 +170,7 @@ const SelectiveLoginScreen = (props) => {
                                         <Picker
                                             selectedValue={selectedClass}
                                             mode="dropdown"
-                                            onValueChange={(itemValue, itemIndex) =>
+                                            onValueChange={(itemValue) =>
                                                 setSelectedClass(itemValue)
                                             }>
                                             <Picker.Item label="1-A" value="1-A" />

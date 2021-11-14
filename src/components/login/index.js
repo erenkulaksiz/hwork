@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, TouchableOpacity } from 'react-native';
+import { Text, View } from 'react-native';
 
 // Styles
 import styles from './style';
@@ -30,22 +30,25 @@ const LoginComponent = (props) => {
                     style={{ height: "30%" }}
                     onPress={() => props.onButtonPress({ screen: props.screen, action: "student" })}
                 />
-                <Button
-                    text={"Teacher"}
-                    txtColor={"white"}
-                    icon={<TeacherIcon width={24} height={24} fill={"#fff"} />}
-                    btnColor={"#22B2DA"}
-                    style={{ height: "20%" }}
-                    onPress={() => props.onButtonPress({ screen: props.screen, action: "teacher" })}
-                />
-                <Button
-                    text={"Principle"}
-                    txtColor={"white"}
-                    icon={<PrincipleIcon width={24} height={24} fill={"#fff"} />}
-                    btnColor={"#22B2DA"}
-                    style={{ height: "20%" }}
-                    onPress={() => props.onButtonPress({ screen: props.screen, action: "principle" })}
-                />
+                {
+                    props.screen == 2 || <><Button
+                        text={"Teacher"}
+                        txtColor={"white"}
+                        icon={<TeacherIcon width={24} height={24} fill={"#fff"} />}
+                        btnColor={"#22B2DA"}
+                        style={{ height: "20%" }}
+                        onPress={() => props.onButtonPress({ screen: props.screen, action: "teacher" })}
+                    />
+                        <Button
+                            text={"Principle"}
+                            txtColor={"white"}
+                            icon={<PrincipleIcon width={24} height={24} fill={"#fff"} />}
+                            btnColor={"#22B2DA"}
+                            style={{ height: "20%" }}
+                            onPress={() => props.onButtonPress({ screen: props.screen, action: "principle" })}
+                        /></>
+                }
+
             </View>
         </View>
     );
