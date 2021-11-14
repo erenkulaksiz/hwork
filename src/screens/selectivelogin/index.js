@@ -101,6 +101,7 @@ const SelectiveLoginScreen = (props) => {
 
             if (signupName == "" || signupName.length < 2) {
                 alert("Please enter a valid name.");
+                setLoadingSignup(false);
                 return;
             }
 
