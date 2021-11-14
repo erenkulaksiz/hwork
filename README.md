@@ -32,7 +32,7 @@ https://drive.google.com/drive/folders/1BfGEINBitcuPoxY3M_aN-GGN0iZDX9RQ?usp=sha
 
 ## Project description
 
-I had to complete the project in 4 days. I've never took a project for a 'limited' time, when i got the project i found myself speedrunning the code. Since i was just speedrunning, i wasnt aware how the code became awful. I am not happy with the code i wrote, but there wasn't proper backend and i needed to simulate the stuff i needed. I was first planning to use React Native & Typescript and Firebase combination, but i never worked with that stack so i know i couldn't finish the project in time if i used that stack, so i just with the stack i knew (React Native & Redux).
+I had to complete the project in 4 days. I've never took a project for a 'limited' time, when i got the project i found myself speedrunning the code. Since i was just speedrunning, i wasnt aware how the code became awful. I am not happy with the code i wrote, but there wasn't proper backend and i needed to simulate the stuff i needed. I was first planning to use React Native & Typescript and Firebase combination, but i never worked with that stack so i know i couldn't finish the project in time if i used that stack, so i just went with the stack i knew (React Native & Redux).
 I'm just happy about how the frontend came out like same in Figma, its pixel-perfect.
 I first designed the frontend with Figma, then i stuck at some point because i cannot see where the project could go, then i just started making screens while i am coding them without Figma.
 I've used Mockapi.io to simulate backend \
